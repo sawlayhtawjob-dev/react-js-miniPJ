@@ -1,53 +1,72 @@
-// src/App.jsx
-import { useState, useEffect } from 'react'; // 1. useEffect ကို Import လုပ်ပါ
-import ControlPanel from './ControlPanel';
-import PreviewCard from './PreviewCard';
+import { useState, useEffect } from 'react';
 
 function App() {
-  // 2. LocalStorage ထဲတွင် သိမ်းထားသော Data ရှိပါက ပြန်ထုတ်မည်၊ မရှိပါက Default Data သုံးမည်
-  const [cardData, setCardData] = useState(() => {
-    const savedData = localStorage.getItem("inviteCraft_card");
-    return savedData ? JSON.parse(savedData) : {
-      title: "WEDDING INVITATION",
-      name: "Eleanor & Theodore",
-      shape: "Standard",
-      bgColor: "#fffbe6",
-      isVip: false
-    };
-  });
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const [error, setError] = useState("");
-
-  // 3. useEffect: cardData ပြောင်းလဲတိုင်း LocalStorage ထဲသို့ အလိုအလျောက် သွားရောက် သိမ်းဆည်းမည်
   useEffect(() => {
-    localStorage.setItem("inviteCraft_card", JSON.stringify(cardData));
-  }, [cardData]);
+    const fetchTemplates = async () => {
+      try {
+        // API မှ Card Sample Data များ ယူခြင်း
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=6');
+        
+        if (!response.ok) {
+          throw new Error('Data တောင်းယူမှု မအောင်မြင်ပါ');
+        }
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setCardData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value
-    }));
+        const data = await response.json();
+        setTemplates(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (name === "name" && value.trim() !== "") {
-      setError("");
-    }
-  };
+    fetchTemplates();
+  }, []);
 
   return (
-    <div style={{ display: 'flex', gap: '30px', padding: '30px', fontFamily: 'sans-serif' }}>
-      <ControlPanel 
-        cardData={cardData} 
-        handleChange={handleChange}
-        setCardData={setCardData}
-        error={error}
-        setError={setError}
-      />
+    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+      <h1>InviteCraft Cards</h1>
 
-      <PreviewCard 
-        cardData={cardData}
-      />
+      {/* Loading အခြေအနေ */}
+      {loading && <p>Card သတင်းအချက်အလက်များ ဆွဲယူနေပါသည်...</p>}
+
+      {/* Error အခြေအနေ */}
+      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+
+      {/* Data ရရှိပါက Card များကို Grid ပုံစံဖြင့် ခင်းပြခြင်း */}
+      {!loading && !error && (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+          gap: '16px'
+        }}>
+          {templates.map((item) => (
+            <div key={item.id} style={{
+              border: '1px solid #ccc',
+              borderRadius: '8px',
+              padding: '16px',
+              backgroundColor: '#f9f9f9'
+            }}>
+              <h3 style={{ textTransform: 'capitalize' }}>{item.title.slice(0, 20)}</h3>
+              <p>{item.body}</p>
+              <button style={{
+                backgroundColor: '#0070f3',
+                color: 'white',
+                border: 'none',
+                padding: '8px 12px',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}>
+                Use Template
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
