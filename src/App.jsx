@@ -1,74 +1,71 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import ControlDrawer from './components/ControlDrawer';
+import CanvasPreview from './components/CanvasPreview';
 
-function App() {
+export default function App() {
+  const [cardData, setCardData] = useState(() => {
+    const saved = localStorage.getItem("inviteCraft_react_data");
+    return saved ? JSON.parse(saved) : {
+      title: "YOU ARE CORDIALLY INVITED TO CELEBRATE",
+      name: "ALEX'S 25TH BIRTHDAY",
+      date: "OCT 12, 2026",
+      location: "GRAND BALLROOM",
+      shape: "Arch Top",
+      bgColor: "#fffbe6",
+      isVip: true
+    };
+  });
+
+  const [error, setError] = useState("");
   const [templates, setTemplates] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchTemplates = async () => {
-      try {
-        // API မှ Card Sample Data များ ယူခြင်း
-        const response = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=6');
-        
-        if (!response.ok) {
-          throw new Error('Data တောင်းယူမှု မအောင်မြင်ပါ');
-        }
+    localStorage.setItem("inviteCraft_react_data", JSON.stringify(cardData));
+  }, [cardData]);
 
-        const data = await response.json();
-        setTemplates(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setCardData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value
+    }));
 
-    fetchTemplates();
-  }, []);
+    if (name === "name" && value.trim() !== "") {
+      setError("");
+    }
+  };
+
+  const fetchTemplates = async () => {
+    try {
+      const res = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=4');
+      if (!res.ok) throw new Error("Network response was not ok");
+      const data = await res.json();
+      setTemplates(data);
+    } catch (err) {
+      setError("Failed to load templates from API");
+    }
+  };
+
+  const applyTemplate = (tpl) => {
+    setCardData((prev) => ({
+      ...prev,
+      title: tpl.title.toUpperCase(),
+      date: `NOV ${tpl.id + 10}, 2026`,
+      location: `HALL ${tpl.userId}`
+    }));
+  };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-      <h1>InviteCraft Cards</h1>
-
-      {/* Loading အခြေအနေ */}
-      {loading && <p>Card သတင်းအချက်အလက်များ ဆွဲယူနေပါသည်...</p>}
-
-      {/* Error အခြေအနေ */}
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-
-      {/* Data ရရှိပါက Card များကို Grid ပုံစံဖြင့် ခင်းပြခြင်း */}
-      {!loading && !error && (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
-          gap: '16px'
-        }}>
-          {templates.map((item) => (
-            <div key={item.id} style={{
-              border: '1px solid #ccc',
-              borderRadius: '8px',
-              padding: '16px',
-              backgroundColor: '#f9f9f9'
-            }}>
-              <h3 style={{ textTransform: 'capitalize' }}>{item.title.slice(0, 20)}</h3>
-              <p>{item.body}</p>
-              <button style={{
-                backgroundColor: '#0070f3',
-                color: 'white',
-                border: 'none',
-                padding: '8px 12px',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}>
-                Use Template
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+    <div style={{ display: 'flex', gap: '30px', padding: '30px', maxWidth: '1000px', margin: '0 auto', fontFamily: 'sans-serif' }}>
+      <ControlDrawer
+        cardData={cardData}
+        handleChange={handleChange}
+        error={error}
+        fetchTemplates={fetchTemplates}
+        templates={templates}
+        applyTemplate={applyTemplate}
+      />
+      <CanvasPreview cardData={cardData} />
     </div>
   );
 }
-
-export default App;
