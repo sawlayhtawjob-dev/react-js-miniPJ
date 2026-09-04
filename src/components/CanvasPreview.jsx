@@ -10,6 +10,7 @@ export default function CanvasPreview({ cardData }) {
   return (
     <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#eef2f5', padding: '40px', borderRadius: '12px' }}>
       <div
+        className="printable-card"
         style={{
           width: '320px',
           minHeight: '420px',

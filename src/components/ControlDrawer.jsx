@@ -3,6 +3,11 @@ import React from 'react';
 export default function ControlDrawer({ cardData, handleChange, error, fetchTemplates, templates, applyTemplate }) {
   const presetColors = ["#fffbe6", "#e6f7ff", "#ffe6e6", "#e6ffe6", "#2c3e50"];
 
+    // Print function
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <div className="control-drawer" style={{ width: '320px', padding: '20px', background: '#f8f9fa', borderRadius: '12px', color: '#333', boxSizing: 'border-box' }}>
       <h2>🎨 InviteCraft Controls</h2>
@@ -108,6 +113,25 @@ export default function ControlDrawer({ cardData, handleChange, error, fetchTemp
           Enable VIP Badge
         </label>
       </div>
+
+      {/* 🖨️ Save as PDF / Print Button */}
+      <button 
+        type="button"
+        onClick={handlePrint} 
+        style={{ 
+          width: '100%', 
+          padding: '10px', 
+          backgroundColor: '#28a745', 
+          color: '#fff', 
+          border: 'none', 
+          borderRadius: '6px', 
+          fontWeight: 'bold', 
+          cursor: 'pointer',
+          marginBottom: '15px'
+        }}
+      >
+        🖨️ Save as PDF / Print
+      </button>
 
       {/* External API Integration Trigger */}
       <hr />

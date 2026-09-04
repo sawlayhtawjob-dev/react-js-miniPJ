@@ -183,3 +183,38 @@
     border-right-color: var(--border);
   }
 }
+
+/* --- App.css ထဲတွင် ထည့်ရန် --- */
+@media print {
+  /* Print ထုတ်ရင် Card ရဲ့ Background Color နဲ့ VIP Badge ရဲ့ Gold Color မပျောက်စေရန် */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  /* 1. ဘာမှမပေါ်အောင် အရင် ဖျောက်ထားမည် */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* 2. Card နဲ့ Card ထဲက စာတွေကိုပဲ ပြန်ဖော်မည် */
+  .printable-card, 
+  .printable-card * {
+    visibility: visible !important;
+  }
+
+  /* 3. Card ကို စာရွက်ရဲ့ အလယ်တည့်တည့် (Center) ပို့မည် */
+  .printable-card {
+    position: fixed !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+  }
+
+  /* 4. စာရွက် Margins များကို ဖျောက်မည် */
+  @page {
+    size: auto;
+    margin: 0;
+  }
+}

@@ -1,3 +1,4 @@
+import './App.css';
 import React, { useState, useEffect } from 'react';
 import ControlDrawer from './components/ControlDrawer';
 import CanvasPreview from './components/CanvasPreview';
